@@ -96,7 +96,7 @@ class LibraryIntentHandler(AbstractRequestHandler):
         # type: (HandlerInput) -> Response
         s3info:dict = get_secret()
         bucket = s3.Bucket(s3info['s3bucket'])
-        obj = bucket.Objects3info['s3key'])
+        obj = bucket.Object(s3info['s3key'])
         response = obj.get()
         bookinfo:dict = json.loads(response['Body'].read().decode('utf-8'))
         speech_text = ""
