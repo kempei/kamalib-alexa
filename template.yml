@@ -32,6 +32,7 @@ Resources:
       Handler: library.handler
       Runtime: python3.8
       Role: !GetAtt LambdaExecutionRole.Arn
+      Timeout: 20
       Events:
         AlexaSkillEvent:
           Type: AlexaSkill
