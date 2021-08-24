@@ -11,9 +11,67 @@ from ask_sdk_core.handler_input import HandlerInput
 
 from ask_sdk_model import Response
 
+import boto3
+import base64
+from botocore.exceptions import ClientError
+
+import json
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
+s3 = boto3.resource('s3')
+
+def get_secret():
+
+    secret_name = "kamalib"
+    region_name = "ap-northeast-1"
+
+    # Create a Secrets Manager client
+    session = boto3.session.Session()
+    client = session.client(
+        service_name='secretsmanager',
+        region_name=region_name
+    )
+
+    # In this sample we only handle the specific exceptions for the 'GetSecretValue' API.
+    # See https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_GetSecretValue.html
+    # We rethrow the exception by default.
+
+    try:
+        get_secret_value_response = client.get_secret_value(
+            SecretId=secret_name
+        )
+    except ClientError as e:
+        if e.response['Error']['Code'] == 'DecryptionFailureException':
+            # Secrets Manager can't decrypt the protected secret text using the provided KMS key.
+            # Deal with the exception here, and/or rethrow at your discretion.
+            raise e
+        elif e.response['Error']['Code'] == 'InternalServiceErrorException':
+            # An error occurred on the server side.
+            # Deal with the exception here, and/or rethrow at your discretion.
+            raise e
+        elif e.response['Error']['Code'] == 'InvalidParameterException':
+            # You provided an invalid value for a parameter.
+            # Deal with the exception here, and/or rethrow at your discretion.
+            raise e
+        elif e.response['Error']['Code'] == 'InvalidRequestException':
+            # You provided a parameter value that is not valid for the current state of the resource.
+            # Deal with the exception here, and/or rethrow at your discretion.
+            raise e
+        elif e.response['Error']['Code'] == 'ResourceNotFoundException':
+            # We can't find the resource that you asked for.
+            # Deal with the exception here, and/or rethrow at your discretion.
+            raise e
+    else:
+        # Decrypts secret using the associated KMS CMK.
+        # Depending on whether the secret is a string or binary, one of these fields will be populated.
+        if 'SecretString' in get_secret_value_response:
+            secret = get_secret_value_response['SecretString']
+            return secret
+        else:
+            decoded_binary_secret = base64.b64decode(get_secret_value_response['SecretBinary'])
+            return decoded_binary_secret
 
 class LaunchRequestHandler(AbstractRequestHandler):
     """Handler for Skill Launch."""
@@ -36,7 +94,18 @@ class LibraryIntentHandler(AbstractRequestHandler):
 
     def handle(self, handler_input):
         # type: (HandlerInput) -> Response
-        speech_text = "図書館!"
+        s3info:dict = get_secret()
+        bucket = s3.Bucket(s3info['s3bucket'])
+        obj = bucket.Objects3info['s3key'])
+        response = obj.get()
+        bookinfo:dict = json.loads(response['Body'].read().decode('utf-8'))
+        speech_text = ""
+        for name, books in bookinfo.values():
+            if len(speech_text) > 0:
+                speech_text = f"{speech_text}、"
+            speech_text = f"{speech_text}{name}は{len(books)}冊"
+        speech_text = f"{speech_text}の本を借りています。"
+
         handler_input.response_builder.speak(speech_text).set_should_end_session(True)
         return handler_input.response_builder.response
 
