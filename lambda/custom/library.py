@@ -17,6 +17,8 @@ from botocore.exceptions import ClientError
 
 import json
 
+from datetime import datetime
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
@@ -105,8 +107,25 @@ class LibraryIntentHandler(AbstractRequestHandler):
         for name, books in bookinfo.items():
             if len(speech_text) > 0:
                 speech_text = f"{speech_text}、"
-            speech_text = f"{speech_text}{name}は{len(books)}冊"
-        speech_text = f"{speech_text}の本を借りています。"
+            if len(books) > 0:
+                speech_text = f"{speech_text}{name}は{len(books)}冊"
+        if len(speech_text) > 0:
+            speech_text = f"{speech_text}の本を借りています。"
+            min_mmdd = 9999
+            min_mm = 0
+            min_dd = 0
+            for name, books in bookinfo.items():
+                for book in books:
+                    deadline = book["deadline"]
+                    d:datetime = datetime.strptime(deadline, "%Y/%m/%d")
+                    mmdd = d.month * 100 + d.day
+                    if mmdd < min_mmdd:
+                        min_mmdd = mmdd
+                        min_mm = d.month
+                        min_dd = d.day
+            speech_text = f"{speech_text}直近の返却期限は{min_mm}月{min_dd}日です。"
+        else:
+            speech_text = f"現在1冊も本を借りていません。"
 
         handler_input.response_builder.speak(speech_text).set_should_end_session(True)
         return handler_input.response_builder.response
