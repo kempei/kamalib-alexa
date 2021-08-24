@@ -102,7 +102,7 @@ class LibraryIntentHandler(AbstractRequestHandler):
         response = obj.get()
         bookinfo:dict = json.loads(response['Body'].read().decode('utf-8'))
         speech_text = ""
-        for name, books in bookinfo.values():
+        for name, books in bookinfo.items():
             if len(speech_text) > 0:
                 speech_text = f"{speech_text}、"
             speech_text = f"{speech_text}{name}は{len(books)}冊"
