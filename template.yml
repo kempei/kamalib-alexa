@@ -29,14 +29,13 @@ Resources:
     Properties:
       FunctionName: !Sub 'awscodestar-${ProjectId}-lambda-CustomDefaultFunction'
       CodeUri: 'lambda/custom'
-      Handler: hello_world.handler
-      Runtime: python3.7
+      Handler: library.handler
+      Runtime: python3.8
       Role: !GetAtt LambdaExecutionRole.Arn
       Events:
         AlexaSkillEvent:
           Type: AlexaSkill
   LambdaExecutionRole:
-    Description: Creating service role in IAM for AWS Lambda
     Type: AWS::IAM::Role
     Properties:
       RoleName: !Sub 'CodeStar-${ProjectId}-Execution${Stage}'

@@ -28,15 +28,15 @@ class LaunchRequestHandler(AbstractRequestHandler):
         return handler_input.response_builder.response
 
 
-class HelloWorldIntentHandler(AbstractRequestHandler):
-    """Handler for Hello World Intent."""
+class LibraryIntentHandler(AbstractRequestHandler):
+    """Handler for Library Intent."""
     def can_handle(self, handler_input):
         # type: (HandlerInput) -> bool
-        return is_intent_name("HelloWorldIntent")(handler_input)
+        return is_intent_name("LibraryIntent")(handler_input)
 
     def handle(self, handler_input):
         # type: (HandlerInput) -> Response
-        speech_text = "Hello World!"
+        speech_text = "図書館!"
         handler_input.response_builder.speak(speech_text).set_should_end_session(True)
         return handler_input.response_builder.response
 
@@ -49,7 +49,7 @@ class HelpIntentHandler(AbstractRequestHandler):
 
     def handle(self, handler_input):
         # type: (HandlerInput) -> Response
-        speech_text = "You can say hello to me! How can I help?"
+        speech_text = "何かお手伝いできることはありますか？"
         handler_input.response_builder.speak(speech_text).ask(speech_text)
         return handler_input.response_builder.response
 
@@ -63,7 +63,7 @@ class CancelOrStopIntentHandler(AbstractRequestHandler):
 
     def handle(self, handler_input):
         # type: (HandlerInput) -> Response
-        speech_text = "Goodbye!"
+        speech_text = "さようなら!"
         handler_input.response_builder.speak(speech_text)
         return handler_input.response_builder.response
 
@@ -84,7 +84,7 @@ class SessionEndedRequestHandler(AbstractRequestHandler):
 # for your intents by defining them above, then also adding them to the request
 # handler chain below.
 class IntentReflectorHandler(AbstractRequestHandler):
-    """Handler for Hello World Intent."""
+    """Handler for Library Intent."""
     def can_handle(self, handler_input):
         # type: (HandlerInput) -> bool
         return is_request_type("IntentRequest")(handler_input)
@@ -92,7 +92,7 @@ class IntentReflectorHandler(AbstractRequestHandler):
     def handle(self, handler_input):
         # type: (HandlerInput) -> Response
         intent_name = handler_input.request_envelope.request.intent.name
-        speech_text = ("You just triggered {}").format(intent_name)
+        speech_text = ("今あなたは {} を起動しました").format(intent_name)
         handler_input.response_builder.speak(speech_text).set_should_end_session(True)
         return handler_input.response_builder.response
 
@@ -111,7 +111,7 @@ class ErrorHandler(AbstractExceptionHandler):
     def handle(self, handler_input, exception):
         # type: (HandlerInput, Exception) -> Response
         logger.error(exception, exc_info=True)
-        speech_text = "Sorry, I couldn't understand what you said. Please try again."
+        speech_text = "申し訳ありません。図書館スキルはうまく聞き取ることができませんでした。"
         handler_input.response_builder.speak(speech_text).ask(speech_text)
         return handler_input.response_builder.response
 
@@ -121,7 +121,7 @@ class ErrorHandler(AbstractExceptionHandler):
 # defined are included below. The order matters - they're processed top to bottom.
 sb = SkillBuilder()
 sb.add_request_handler(LaunchRequestHandler())
-sb.add_request_handler(HelloWorldIntentHandler())
+sb.add_request_handler(LibraryIntentHandler())
 sb.add_request_handler(HelpIntentHandler())
 sb.add_request_handler(CancelOrStopIntentHandler())
 sb.add_request_handler(SessionEndedRequestHandler())

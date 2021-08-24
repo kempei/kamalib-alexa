@@ -2,15 +2,14 @@
   "manifest": {
     "publishingInformation": {
       "locales": {
-        "en-US": {
-          "summary": "A basic skill made from Alexa Skills Kit template",
+        "ja-JP": {
+          "summary": "鎌倉図書館",
           "examplePhrases": [
-            "Alexa open hello python",
-            "Alexa tell hello python hello",
-            "Alexa ask hello python say hello"
+            "アレクサ、鎌倉図書館を開いて",
+            "アレクサ、図書館を開いて"
           ],
-          "name": "hello python",
-          "description": "A basic skill made from Alexa Skills Kit template"
+          "name": "鎌倉図書館",
+          "description": "鎌倉図書館で現在借りている本の状況を確認する"
         }
       },
       "isAvailableWorldwide": true,
