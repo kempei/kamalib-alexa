@@ -20,8 +20,6 @@ import json
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-s3 = boto3.resource('s3')
-
 def get_secret():
 
     secret_name = "kamalib"
@@ -63,15 +61,16 @@ def get_secret():
             # We can't find the resource that you asked for.
             # Deal with the exception here, and/or rethrow at your discretion.
             raise e
-    else:
-        # Decrypts secret using the associated KMS CMK.
-        # Depending on whether the secret is a string or binary, one of these fields will be populated.
-        if 'SecretString' in get_secret_value_response:
-            secret = get_secret_value_response['SecretString']
-            return secret
         else:
-            decoded_binary_secret = base64.b64decode(get_secret_value_response['SecretBinary'])
-            return decoded_binary_secret
+            raise e
+    # Decrypts secret using the associated KMS CMK.
+    # Depending on whether the secret is a string or binary, one of these fields will be populated.
+    if 'SecretString' in get_secret_value_response:
+        secret = get_secret_value_response['SecretString']
+        return secret
+    else:
+        decoded_binary_secret = base64.b64decode(get_secret_value_response['SecretBinary'])
+        return decoded_binary_secret
 
 class LaunchRequestHandler(AbstractRequestHandler):
     """Handler for Skill Launch."""
@@ -94,7 +93,10 @@ class LibraryIntentHandler(AbstractRequestHandler):
 
     def handle(self, handler_input):
         # type: (HandlerInput) -> Response
+        s3 = boto3.resource('s3')
         s3info:dict = get_secret()
+        if s3info is None:
+            raise RuntimeError("s3info is null")
         bucket = s3.Bucket(s3info['s3bucket'])
         obj = bucket.Object(s3info['s3key'])
         response = obj.get()
