@@ -50,20 +50,20 @@ Resources:
       Policies:
         - S3ReadPolicy: # S3リードポリシー設定
             BucketName: {{resolve:ssm:kamalib_s3bucket:1}}
-      - Statement:
-        - Sid: SSMDescribeParametersPolicy
-          Effect: Allow
-          Action:
-          - ssm:DescribeParameters
-          Resource: '*'
-        - Sid: SSMPutGetParameterPolicy
-          Effect: Allow
-          Action:
-          - ssm:GetParameters
-          - ssm:GetParameter
-          - ssm:PutParameters
-          - ssm:PutParameter
-          Resource: '*'
+        - Statement:
+          - Sid: SSMDescribeParametersPolicy
+            Effect: Allow
+            Action:
+            - ssm:DescribeParameters
+            Resource: '*'
+          - Sid: SSMPutGetParameterPolicy
+            Effect: Allow
+            Action:
+            - ssm:GetParameters
+            - ssm:GetParameter
+            - ssm:PutParameters
+            - ssm:PutParameter
+            Resource: '*'
 
 Outputs:
   overrides:
