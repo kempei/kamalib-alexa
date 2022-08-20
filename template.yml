@@ -57,7 +57,7 @@ Resources:
           - s3:GetBucketLocation
           - s3:GetObjectVersion
           - s3:GetLifecycleConfiguration
-          Resource: {{resolve:ssm:kamalib_s3bucket:1}}
+          Resource: "{{resolve:ssm:kamalib_s3bucket:1}}"
         - Sid: SSMDescribeParametersPolicy
           Effect: Allow
           Action:
