@@ -35,17 +35,17 @@ Resources:
         - arm64
       Layers:
         - arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPython:13
-      Role: !GetAtt LambdaExecutionRole.Arn
       Timeout: 20
       Events:
         AlexaSkillEvent:
           Type: AlexaSkill
-  LambdaExecutionRole:
-    Type: AWS::IAM::Role
-    Properties:
-      RoleName: !Sub 'CodeStar-${ProjectId}-Execution${Stage}'
-      AssumeRolePolicyDocument:
-        Statement:
+      Environment:
+        Variables:
+          LOG_LEVEL: INFO
+          POWERTOOLS_SERVICE_NAME: kamalib_alexa
+          TZ: Asia/Tokyo
+      Policies:
+      - Statement:
         - Sid: SSMDescribeParametersPolicy
           Effect: Allow
           Action:
@@ -59,14 +59,6 @@ Resources:
           - ssm:PutParameters
           - ssm:PutParameter
           Resource: '*'
-        - Effect: Allow
-          Principal:
-            Service: [lambda.amazonaws.com]
-          Action: sts:AssumeRole
-      Path: /
-      ManagedPolicyArns:
-        - !Sub 'arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole'
-      PermissionsBoundary: !Sub 'arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/CodeStar_${ProjectId}_PermissionsBoundary'
 
 Outputs:
   overrides:
