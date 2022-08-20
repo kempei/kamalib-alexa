@@ -49,8 +49,15 @@ Resources:
           TZ: Asia/Tokyo
       Policies:
       - Statement:
-        - S3ReadPolicy: # S3リードポリシー設定
-          BucketName: {{resolve:ssm:kamalib_s3bucket:1}}
+        - Sid: S3ReadPolicy
+          Effect: Allow
+          Action:
+          - s3:GetObject
+          - s3:ListBucket
+          - s3:GetBucketLocation
+          - s3:GetObjectVersion
+          - s3:GetLifecycleConfiguration
+          Resource: {{resolve:ssm:kamalib_s3bucket:1}}
         - Sid: SSMDescribeParametersPolicy
           Effect: Allow
           Action:
