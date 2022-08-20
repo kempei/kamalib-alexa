@@ -30,7 +30,11 @@ Resources:
       FunctionName: !Sub 'awscodestar-${ProjectId}-lambda-CustomDefaultFunction'
       CodeUri: 'lambda/custom'
       Handler: library.handler
-      Runtime: python3.8
+      Runtime: python3.9
+      Architectures:
+        - arm64
+      Layers:
+        - arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPython:13
       Role: !GetAtt LambdaExecutionRole.Arn
       Timeout: 20
       Events:
@@ -42,6 +46,19 @@ Resources:
       RoleName: !Sub 'CodeStar-${ProjectId}-Execution${Stage}'
       AssumeRolePolicyDocument:
         Statement:
+        - Sid: SSMDescribeParametersPolicy
+          Effect: Allow
+          Action:
+          - ssm:DescribeParameters
+          Resource: '*'
+        - Sid: SSMPutGetParameterPolicy
+          Effect: Allow
+          Action:
+          - ssm:GetParameters
+          - ssm:GetParameter
+          - ssm:PutParameters
+          - ssm:PutParameter
+          Resource: '*'
         - Effect: Allow
           Principal:
             Service: [lambda.amazonaws.com]

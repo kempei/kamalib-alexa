@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 # This sample demonstrates handling intents from an Alexa skill using the Alexa Skills Kit SDK.
-import logging
 
 from ask_sdk_core.skill_builder import SkillBuilder
 from ask_sdk_core.dispatch_components import AbstractRequestHandler
@@ -15,64 +14,15 @@ import boto3
 import base64
 from botocore.exceptions import ClientError
 
+from aws_lambda_powertools.utilities import parameters
+from aws_lambda_powertools import Logger
+
+
 import json
 
 from datetime import datetime
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-
-def get_secret():
-
-    secret_name = "kamalib"
-    region_name = "ap-northeast-1"
-
-    # Create a Secrets Manager client
-    session = boto3.session.Session()
-    client = session.client(
-        service_name='secretsmanager',
-        region_name=region_name
-    )
-
-    # In this sample we only handle the specific exceptions for the 'GetSecretValue' API.
-    # See https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_GetSecretValue.html
-    # We rethrow the exception by default.
-
-    try:
-        get_secret_value_response = client.get_secret_value(
-            SecretId=secret_name
-        )
-    except ClientError as e:
-        if e.response['Error']['Code'] == 'DecryptionFailureException':
-            # Secrets Manager can't decrypt the protected secret text using the provided KMS key.
-            # Deal with the exception here, and/or rethrow at your discretion.
-            raise e
-        elif e.response['Error']['Code'] == 'InternalServiceErrorException':
-            # An error occurred on the server side.
-            # Deal with the exception here, and/or rethrow at your discretion.
-            raise e
-        elif e.response['Error']['Code'] == 'InvalidParameterException':
-            # You provided an invalid value for a parameter.
-            # Deal with the exception here, and/or rethrow at your discretion.
-            raise e
-        elif e.response['Error']['Code'] == 'InvalidRequestException':
-            # You provided a parameter value that is not valid for the current state of the resource.
-            # Deal with the exception here, and/or rethrow at your discretion.
-            raise e
-        elif e.response['Error']['Code'] == 'ResourceNotFoundException':
-            # We can't find the resource that you asked for.
-            # Deal with the exception here, and/or rethrow at your discretion.
-            raise e
-        else:
-            raise e
-    # Decrypts secret using the associated KMS CMK.
-    # Depending on whether the secret is a string or binary, one of these fields will be populated.
-    if 'SecretString' in get_secret_value_response:
-        secret = get_secret_value_response['SecretString']
-        return json.loads(secret)
-    else:
-        decoded_binary_secret = base64.b64decode(get_secret_value_response['SecretBinary'])
-        return json.loads(decoded_binary_secret)
+logger = Logger()
 
 class LaunchRequestHandler(AbstractRequestHandler):
     """Handler for Skill Launch."""
@@ -96,7 +46,7 @@ class LibraryIntentHandler(AbstractRequestHandler):
     def handle(self, handler_input):
         # type: (HandlerInput) -> Response
         s3 = boto3.resource('s3')
-        s3info:dict = get_secret()
+        s3info:dict = parameters.get_parameter("kamalib", transform="json")
         if s3info is None:
             raise RuntimeError("s3info is null")
         bucket = s3.Bucket(s3info['s3bucket'])
@@ -200,7 +150,7 @@ class ErrorHandler(AbstractExceptionHandler):
 
     def handle(self, handler_input, exception):
         # type: (HandlerInput, Exception) -> Response
-        logger.error(exception, exc_info=True)
+        logger.error(exception)
         speech_text = "申し訳ありません。図書館スキルはうまく聞き取ることができませんでした。"
         handler_input.response_builder.speak(speech_text).ask(speech_text)
         return handler_input.response_builder.response
