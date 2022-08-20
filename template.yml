@@ -48,9 +48,8 @@ Resources:
           POWERTOOLS_SERVICE_NAME: kamalib_alexa
           TZ: Asia/Tokyo
       Policies:
-      - S3ReadPolicy: # S3リードポリシー設定
+        - S3ReadPolicy: # S3リードポリシー設定
           BucketName: {{resolve:ssm:kamalib_s3bucket:1}}
-      - Statement:
         - Sid: SSMDescribeParametersPolicy
           Effect: Allow
           Action:
