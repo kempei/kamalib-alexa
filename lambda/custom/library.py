@@ -46,11 +46,8 @@ class LibraryIntentHandler(AbstractRequestHandler):
     def handle(self, handler_input):
         # type: (HandlerInput) -> Response
         s3 = boto3.resource('s3')
-        s3info:dict = parameters.get_parameter("kamalib", transform="json")
-        if s3info is None:
-            raise RuntimeError("s3info is null")
-        bucket = s3.Bucket(s3info['s3bucket'])
-        obj = bucket.Object(s3info['s3key'])
+        bucket = s3.Bucket(parameters.get_parameter("kamalib_s3bucket"))
+        obj = bucket.Object(parameters.get_parameter("kamalib_s3key"))
         response = obj.get()
         bookinfo:dict = json.loads(response['Body'].read().decode('utf-8'))
         speech_text = ""
